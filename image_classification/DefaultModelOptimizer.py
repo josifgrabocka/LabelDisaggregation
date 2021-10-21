@@ -1,5 +1,6 @@
 import tensorflow as tf
 import time
+import tensorflow_addons as tfa
 
 class DefaultModelOptimizer:
 
@@ -10,10 +11,21 @@ class DefaultModelOptimizer:
         self.test_ds = self.data_interface.test_ds
         self.num_classes = self.data_interface.num_classes
         self.config = config
+        self.l2_penalty=config["l2_penalty"]
+
+        first_decay_steps = 0
+        for _ in self.train_ds:
+            first_decay_steps += 1
 
         # create the initializers
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
-        self.prediction_optimizer = tf.keras.optimizers.Adam(learning_rate=config['eta'])
+        step = tf.Variable(0, trainable=False)
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
+                                                                     first_decay_steps=first_decay_steps)
+        wd = self.l2_penalty * lr_sched(step)
+
+        self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+        tf.keras.optimizers.Adam()
 
         # the metrics for storing the training performance
         self.train_loss = tf.keras.metrics.Mean(name='train_loss')
