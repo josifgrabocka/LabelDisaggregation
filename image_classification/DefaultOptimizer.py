@@ -79,7 +79,7 @@ class DefaultOptimizer:
                     self.test_step(x, y)
 
                 template = 'Epoch {}, Train: {:4.4f}, {:4.4f}, Test: {:4.4f}, {:4.4f}, Time: {:4.4f}'
-                print(template.format(epoch + 1,
+                print(template.format(epoch,
                                       self.train_loss.result(),
                                       self.train_accuracy.result(),
                                       self.test_loss.result(),
