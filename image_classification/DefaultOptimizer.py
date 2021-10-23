@@ -2,7 +2,7 @@ import tensorflow as tf
 import time
 import tensorflow_addons as tfa
 
-class DefaultModelOptimizer:
+class DefaultOptimizer:
 
     def __init__(self, prediction_model, data_interface, config):
         self.prediction_model = prediction_model

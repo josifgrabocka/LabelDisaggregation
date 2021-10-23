@@ -1,6 +1,7 @@
 from image_classification.DataInterface import DataInterface
 from image_classification.PredictionModel import PredictionModel
-from image_classification.DefaultModelOptimizer import DefaultModelOptimizer
+from image_classification.DefaultOptimizer import DefaultOptimizer
+from image_classification.LearnHardWay import LearnHardWay
 import argparse
 import tensorflow as tf
 
@@ -9,6 +10,7 @@ import tensorflow as tf
 parser = argparse.ArgumentParser()
 parser.add_argument("dataset", help="The name of the tfds dataset, e.g. {mnist, cifar10}")
 parser.add_argument("model", help="The name of the model, e.g. {DenseNet121, NASNetMobile}")
+parser.add_argument('--learning_style', help='Style: {hard, normal}')
 parser.add_argument('--epochs', help='Number of epochs', type=int)
 parser.add_argument('--batch_size', help='Batch size', type=int)
 parser.add_argument('--eta', help='Learning rate', type=float)
@@ -30,8 +32,6 @@ config = {'buffer_size': 10000,
           'checkpoint_frequency': 10}
 
 # the default image sizes that the models expect
-
-
 if args.model == 'MobileNetV2':
     config['image_size'] = (224, 224, 3)
 elif args.model == 'MobileNetV3Small' or args.model == 'MobileNetV3Large':
@@ -53,11 +53,13 @@ elif args.model == 'EfficientNetB3':
 else:
     config['image_size'] = (32, 32, 3)
 
+# set the configurations
 if args.image_size:
     config['image_size'] = args.image_size
-
-
-config['batch_size'] = args.batch_size
+if args.learning_style:
+    config['learning_style'] = args.learning_style
+if args.batch_size:
+    config['batch_size'] = args.batch_size
 
 # load the dataset
 data_interface = DataInterface(config=config)
@@ -69,6 +71,11 @@ pm = PredictionModel(config=config)
 m = pm.create_prediction_model(model_name=args.model, num_classes=data_interface.num_classes)
 m.summary()
 
-de = DefaultModelOptimizer(prediction_model=m, config=config, data_interface=data_interface)
-de.run()
+# run the optimizer
+if config['learning_style'] == 'normal':
+    de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
+    de.run()
+elif config['learning_style'] == 'normal':
+    lhw = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
+    lhw.run()
 
