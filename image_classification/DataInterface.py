@@ -15,7 +15,7 @@ class DataInterface:
         self.min_val = 100000.0
         self.max_val = -100000.0
 
-        self.rand_aug = iaa.RandAugment(n=3, m=7)
+        self.rand_aug = iaa.RandAugment(n=1, m=7)
 
     # load the demanded dataset
     def load(self, dataset_name):
@@ -48,20 +48,14 @@ class DataInterface:
 
         train_ds, test_ds = tfds.load(dataset_name, split=split)
 
-        tf.print(self.image_size[:-1])
-
         self.train_ds = train_ds.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True)\
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
-            .map(lambda x, y: (tf.divide(x, 255.0), y)) \
-            .map(lambda x, y: (tf.image.per_image_standardization(x), y)) \
             .map(lambda x, y: (tf.py_function(self.augment, [x], [tf.float32])[0], y), num_parallel_calls=tf.data.AUTOTUNE) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .prefetch(tf.data.AUTOTUNE)
 
         self.test_ds = test_ds.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True) \
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
-            .map(lambda x, y: (tf.divide(x, 255.0), y)) \
-            .map(lambda x, y: (tf.image.per_image_standardization(x), y)) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .prefetch(tf.data.AUTOTUNE)
 
