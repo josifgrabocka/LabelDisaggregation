@@ -14,15 +14,15 @@ class DefaultOptimizer:
         self.config = config
         self.l2_penalty=config["l2_penalty"]
 
-        first_decay_steps = 0
+        self.first_decay_steps = 0
         for _ in self.train_ds:
-            first_decay_steps += 1
+            self.first_decay_steps += 1
 
         # create the initializers
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
         lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
-                                                                     first_decay_steps=first_decay_steps)
+                                                                     first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
 
         self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
@@ -48,6 +48,9 @@ class DefaultOptimizer:
 
         self.logs_metrics = [self.train_loss, self.train_accuracy, self.test_loss, self.test_accuracy]
 
+        # define loss functions
+        self.cat_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+
     # the training step of the prediction model
     @tf.function
     def train_step(self, x, y):
@@ -66,7 +69,7 @@ class DefaultOptimizer:
     @tf.function
     def test_step(self, x, y):
         y_pred = self.prediction_model(x, training=False)
-        t_loss = tf.keras.losses.categorical_crossentropy(y_true=y, y_pred=y_pred, from_logits=True)
+        t_loss = self.cat_loss(y_true=y, y_pred=y_pred)
         self.test_loss(t_loss)
         self.test_accuracy(y, y_pred)
 
@@ -89,7 +92,7 @@ class DefaultOptimizer:
                 print('{},'.format(epoch), end='')
                 for metric in self.logs_metrics:
                     print('{:4.4f},'.format(metric.result().numpy()), end='')
-                print('{:4.4f},'.format(time.time() - start_time))
+                print('{:4.2f}'.format(time.time() - start_time))
 
                 # reset the metrics
                 for metric in self.logs_metrics:
