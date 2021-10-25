@@ -79,4 +79,3 @@ elif config['learning_style'] == 'hard':
     config['disaggregation_layers_fracs'] = [0.8, 0.6, 0.4, 0.2]
     lhw = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
     lhw.run()
-
