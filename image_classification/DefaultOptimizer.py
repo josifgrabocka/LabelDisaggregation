@@ -1,6 +1,7 @@
 import tensorflow as tf
 import time
 import tensorflow_addons as tfa
+import datetime
 
 class DefaultOptimizer:
 
@@ -39,7 +40,13 @@ class DefaultOptimizer:
         self.checkpoint_frequency = config['checkpoint_frequency']
         # a prefix string for the checkpoint file name, e.g. dataset name, model name
         # if needed to be set outside outside the class after the constructor
-        self.checkpoint_prefix = ''
+        now = datetime.datetime.now()
+        self.checkpoint_prefix = str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '_' + str(now.hour) \
+                                 + '_' + str(now.minute) + '_' + str(now.second)
+
+        self.save_checkpoints = False
+
+        self.logs_metrics = [self.train_loss, self.train_accuracy, self.test_loss, self.test_accuracy]
 
     # the training step of the prediction model
     @tf.function
@@ -78,19 +85,19 @@ class DefaultOptimizer:
                 for x, y in self.test_ds:
                     self.test_step(x, y)
 
-                template = 'Epoch {}, Train: {:4.4f}, {:4.4f}, Test: {:4.4f}, {:4.4f}, Time: {:4.4f}'
-                print(template.format(epoch,
-                                      self.train_loss.result(),
-                                      self.train_accuracy.result(),
-                                      self.test_loss.result(),
-                                      self.test_accuracy.result(),
-                                      time.time()-start_time))
+                # print the metrics
+                print('{},'.format(epoch), end='')
+                for metric in self.logs_metrics:
+                    print('{:4.4f},'.format(metric.result().numpy()), end='')
+                print('{:4.4f},'.format(time.time() - start_time))
 
-                self.train_loss.reset_states()
-                self.train_accuracy.reset_states()
-                self.test_loss.reset_states()
-                self.test_accuracy.reset_states()
+                # reset the metrics
+                for metric in self.logs_metrics:
+                    metric.reset_states()
 
-            #if epoch % self.checkpoint_frequency == 0:
-            #    # save the checkpoints of the prediction and attack models
-            #    self.prediction_model.save_weights('./checkpoints/prediction_' + self.checkpoint_prefix + '.h5')
+            # save the checkpoints
+            if self.save_checkpoints:
+                if epoch % self.checkpoint_frequency == 0:
+                    # save the checkpoints of the prediction and attack models
+                    self.prediction_model.save_weights('./checkpoints/'+self.checkpoint_prefix+'prediction' + '.h5')
+
