@@ -57,6 +57,7 @@ class DefaultOptimizer:
         with tf.GradientTape() as tape:
             y_pred = self.prediction_model(x, training=True)
             loss_pred = tf.reduce_mean(self.cat_loss(y_true=y, y_pred=y_pred))
+#
 
         weights = self.prediction_model.trainable_variables
         prediction_gradients = tape.gradient(loss_pred, weights)

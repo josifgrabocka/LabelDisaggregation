@@ -20,15 +20,13 @@ class PredictionModel:
                                                                                   alpha=0.35,
                                                                                   input_shape=self.default_input_size)
         elif model_name == 'MobileNetV3Small':
-            pretrained_embedding = tf.keras.applications.MobileNetV3Small(input_shape=None,
-                                                                          include_top=False,
+            pretrained_embedding = tf.keras.applications.MobileNetV3Small(include_top=False,
                                                                           weights=weights)
             # to do fix the dimension 1 axes in the output tensor
         elif model_name == 'MobileNetV3Large':
-            pretrained_embedding = tf.keras.applications.MobileNetV3Large(input_shape=None,
-                                                                          include_top=False,
-                                                                          weights=weights)
+            pretrained_embedding = tf.keras.applications.MobileNetV3Large(weights=weights)
             # to do fix the dimension 1 axes in the output tensor
+
 
         elif model_name == 'NASNetMobile':
             pretrained_embedding = tf.keras.applications.nasnet.NASNetMobile(weights=weights,
@@ -66,13 +64,16 @@ class PredictionModel:
                                                                                      pooling='avg',
                                                                                      input_shape=self.default_input_size)
         elif model_name == 'mini':
-            num_filters = 8
+            num_filters = 32
             kernel_size = 3
             pool_size = 2
 
             pretrained_embedding = tf.keras.models.Sequential([
                 tf.keras.layers.Conv2D(filters=num_filters, kernel_size=kernel_size, activation='relu',
                                        input_shape=self.default_input_size, padding='same'),
+                tf.keras.layers.AvgPool2D(pool_size),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Conv2D(filters=num_filters, kernel_size=kernel_size, activation='relu', padding='same'),
                 tf.keras.layers.AvgPool2D(pool_size),
                 tf.keras.layers.BatchNormalization(),
                 tf.keras.layers.Conv2D(filters=num_filters, kernel_size=kernel_size, activation='relu', padding='same'),
