@@ -21,10 +21,15 @@ class PredictionModel:
                                                                                   input_shape=self.default_input_size)
         elif model_name == 'MobileNetV3Small':
             pretrained_embedding = tf.keras.applications.MobileNetV3Small(include_top=False,
-                                                                          weights=weights)
+                                                                          weights=weights,
+                                                                          pooling='avg',
+                                                                          input_shape=self.default_input_size)
             # to do fix the dimension 1 axes in the output tensor
         elif model_name == 'MobileNetV3Large':
-            pretrained_embedding = tf.keras.applications.MobileNetV3Large(weights=weights)
+            pretrained_embedding = tf.keras.applications.MobileNetV3Large(weights=weights,
+                                                                          pooling='avg',
+                                                                          include_top=False,
+                                                                          input_shape=self.default_input_size)
             # to do fix the dimension 1 axes in the output tensor
 
 
