@@ -15,7 +15,10 @@ class LearnHardWay(DefaultOptimizer):
         disaggregation_outputs = []
         for frac in config['disaggregation_layers_fracs']:
             num_neurons = int(frac*self.data_interface.num_classes)
-            h = tf.keras.layers.Dense(units=num_neurons, activation='sigmoid')(h)
+            h = tf.keras.layers.Dense(units=num_neurons, activation=None)(h)
+            h = tf.keras.layers.BatchNormalization()(h)
+            h = tf.keras.layers.Activation('sigmoid')(h)
+
             disaggregation_outputs.append(h)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
         self.disaggregation_model.summary()
