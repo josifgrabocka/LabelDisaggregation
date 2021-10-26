@@ -56,7 +56,7 @@ class DefaultOptimizer:
     def train_step(self, x, y):
         with tf.GradientTape() as tape:
             y_pred = self.prediction_model(x, training=True)
-            loss_pred = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=y, y_pred=y_pred, from_logits=True))
+            loss_pred = tf.reduce_mean(self.cat_loss(y_true=y, y_pred=y_pred))
 
         weights = self.prediction_model.trainable_variables
         prediction_gradients = tape.gradient(loss_pred, weights)
