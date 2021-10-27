@@ -25,7 +25,9 @@ class DefaultOptimizer:
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
 
-        self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+        #self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+
+        self.prediction_optimizer = tf.optimizers.Adam(learning_rate=config['eta'])
 
         # the metrics for storing the training performance
         self.train_loss = tf.keras.metrics.Mean(name='train_loss')

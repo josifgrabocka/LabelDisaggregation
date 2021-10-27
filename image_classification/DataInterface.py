@@ -34,6 +34,12 @@ class DataInterface:
         elif dataset_name == 'cifar100':
             self.num_classes = 100
             split=["train", "test"]
+        elif dataset_name == 'food101':
+            self.num_classes = 101
+            split = ["train", "test"]
+        elif dataset_name == 'rock_paper_scissors':
+            self.num_classes = 3
+            split = ["train", "test"]
         elif dataset_name == 'imagenet2012':
             self.num_classes = 1000
             split=["train", "validation"]
