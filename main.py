@@ -27,7 +27,7 @@ config = {'buffer_size': 10000,
           'eta': 0.001,
           'batch_size': 100,
           'test_frequency': 1,
-          'l2_penalty': 0.0001,
+          'l2_penalty': 0.001,
           'checkpoint_frequency': 10}
 
 # the default image sizes that the models expect
