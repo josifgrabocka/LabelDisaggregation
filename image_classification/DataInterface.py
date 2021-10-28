@@ -36,7 +36,7 @@ class DataInterface:
             split=["train", "test"]
         elif dataset_name == 'food101':
             self.num_classes = 101
-            split = ["train", "test"]
+            split = ["train", "validation"]
         elif dataset_name == 'rock_paper_scissors':
             self.num_classes = 3
             split = ["train", "test"]
