@@ -42,6 +42,7 @@ class LearnHardWay(DefaultOptimizer):
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
         lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
+                                                                     t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
         self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
