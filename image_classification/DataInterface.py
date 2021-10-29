@@ -40,6 +40,18 @@ class DataInterface:
         elif dataset_name == 'oxford_iiit_pet':
             self.num_classes = 37
             split = ["train", "test"]
+        elif dataset_name == 'dmlab':
+            self.num_classes = 6
+            split = ["train", "test"]
+        elif dataset_name == 'pet_finder':
+            self.num_classes = 5
+            split = ["train", "test"]
+        elif dataset_name == 'sun397':
+            self.num_classes = 397
+            split = ["train", "test"]
+        elif dataset_name == 'svhn_cropped':
+            self.num_classes = 10
+            split = ["train", "test"]
         elif dataset_name == 'rock_paper_scissors':
             self.num_classes = 3
             split = ["train", "test"]
