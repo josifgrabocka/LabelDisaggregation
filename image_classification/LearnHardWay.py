@@ -63,7 +63,7 @@ class LearnHardWay(DefaultOptimizer):
             loss_z = tf.reduce_mean([self.bin_loss(y_true=z, y_pred=z_pred) for z, z_pred in zip(z_list, z_pred_list)])
 
             loss_prediction_model = loss_y + loss_z
-            loss_disaggregation_model = -loss_z
+            loss_disaggregation_model = -tf.sigmoid(loss_z)
 
         # update the prediction model
         prediction_model_weights = self.prediction_model.trainable_variables
