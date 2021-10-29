@@ -23,11 +23,11 @@ args = parser.parse_args()
 
 config = {'buffer_size': 10000,
           'image_size': (224, 224, 3),
-          'num_epochs': 255,
-          'eta': 0.001,
+          'num_epochs': 100,
+          'eta': 0.0001,
           'batch_size': 100,
           'test_frequency': 1,
-          'l2_penalty': 0.00001,
+          'l2_penalty': 0.0001,
           'checkpoint_frequency': 10}
 
 # the default image sizes that the models expect
