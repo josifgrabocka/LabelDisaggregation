@@ -54,13 +54,13 @@ class DataInterface:
 
         train_ds, test_ds = tfds.load(dataset_name, split=split)
 
-        self.train_ds = train_ds.shuffle(self.buffer_size).batch(1) \
+        self.train_ds = train_ds.shuffle(self.buffer_size).batch(1).prefetch(tf.data.AUTOTUNE) \
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
             .map(lambda x, y: (tf.py_function(self.augment, [x], [tf.float32])[0], y), num_parallel_calls=tf.data.AUTOTUNE) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
 
-        self.test_ds = test_ds.shuffle(self.buffer_size).batch(1) \
+        self.test_ds = test_ds.shuffle(self.buffer_size).batch(1).prefetch(tf.data.AUTOTUNE) \
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
