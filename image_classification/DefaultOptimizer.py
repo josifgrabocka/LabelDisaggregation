@@ -17,7 +17,6 @@ class DefaultOptimizer:
         self.first_decay_steps = 0
         for _ in self.train_ds:
             self.first_decay_steps += 1
-
         # make the first steps for 5 epochs
         self.first_decay_steps *= 5
 
