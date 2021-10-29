@@ -65,7 +65,6 @@ class DataInterface:
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .prefetch(tf.data.AUTOTUNE)
 
-
         self.test_ds = test_ds.shuffle(self.buffer_size) \
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
             .batch(self.batch_size) \
