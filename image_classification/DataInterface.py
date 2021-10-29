@@ -24,16 +24,16 @@ class DataInterface:
 
         if dataset_name == 'mnist':
             self.num_classes = 10
-            split=["train", "test"]
+            split = ["train", "test"]
         elif dataset_name == 'fashion_mnist':
             self.num_classes = 10
             split = ["train", "test"]
         elif dataset_name == 'cifar10':
             self.num_classes = 10
-            split=["train", "test"]
+            split = ["train", "test"]
         elif dataset_name == 'cifar100':
             self.num_classes = 100
-            split=["train", "test"]
+            split = ["train", "test"]
         elif dataset_name == 'food101':
             self.num_classes = 101
             split = ["train", "validation"]
@@ -66,7 +66,7 @@ class DataInterface:
             self.num_classes = 1000
             split=["train", "validation"]
 
-
+        print('Downloading dataset', dataset_name, 'splits', split)
         train_ds, test_ds = tfds.load(dataset_name, split=split)
 
         self.train_ds = train_ds.shuffle(self.buffer_size) \
