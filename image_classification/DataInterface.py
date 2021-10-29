@@ -57,17 +57,18 @@ class DataInterface:
 
         train_ds, test_ds = tfds.load(dataset_name, split=split)
 
-        self.train_ds = train_ds.shuffle(self.buffer_size) \
+        self.train_ds = train_ds.shuffle(self.buffer_size).batch(self.batch_size) \
+            .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
+            .map(lambda x, y: (tf.py_function(self.augment, [x], [tf.float32])[0], y),
+                 num_parallel_calls=tf.data.AUTOTUNE) \
+            .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
+            .prefetch(tf.data.AUTOTUNE)
+
+
+        self.test_ds = test_ds.shuffle(self.buffer_size).batch(self.batch_size) \
             .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
-            .batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
-
-        # .map(lambda feats: (tf.py_function(self.augment, [feats['image']], [tf.float32])[0], feats['label']), num_parallel_calls=tf.data.AUTOTUNE) \
-
-        self.test_ds = test_ds.shuffle(self.buffer_size) \
-            .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
-            .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
-            .batch(self.batch_size, drop_remainder=True).prefetch(tf.data.AUTOTUNE)
+            .prefetch(tf.data.AUTOTUNE)
 
     def augment(self, images):
         # Input to `augment()` is a TensorFlow tensor which
