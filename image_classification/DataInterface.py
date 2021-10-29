@@ -57,8 +57,8 @@ class DataInterface:
 
         train_ds, test_ds = tfds.load(dataset_name, split=split)
 
-        self.train_ds = train_ds.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True)\
-            .map(lambda x, y: (tf.image.resize(x, self.image_size[:-1]), y)) \
+        self.train_ds = train_ds.shuffle(self.buffer_size).batch(self.batch_size, drop_remainder=True) \
+            .map(lambda feats: (tf.image.resize(feats['image'], self.image_size[:-1]), feats['label'])) \
             .map(lambda x, y: (tf.image.per_image_standardization(x), y)) \
             .map(lambda x, y: (x, tf.one_hot(y, self.num_classes))) \
             .prefetch(tf.data.AUTOTUNE)
