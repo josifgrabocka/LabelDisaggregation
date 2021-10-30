@@ -17,8 +17,8 @@ class DefaultOptimizer:
         self.first_decay_steps = 0
         for _ in self.train_ds:
             self.first_decay_steps += 1
-        # make the first steps for 5 epochs
-        self.first_decay_steps *= 5
+        # make the first steps for X=10 epochs
+        self.first_decay_steps *= 10
 
         # create the initializers
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
