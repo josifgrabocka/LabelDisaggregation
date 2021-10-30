@@ -21,10 +21,10 @@ class LearnHardWay(DefaultOptimizer):
         self.disaggregation_model.summary()
 
         #define the additional loss terms metrics
-        self.disaggregation_loss = tf.keras.metrics.Mean(name='disaggregation_loss')
-        self.logs_metrics.append(self.disaggregation_loss)
+        self.disaggregation_loss_metric = tf.keras.metrics.Mean(name='disaggregation_loss')
+        self.logs_metrics.append(self.disaggregation_loss_metric)
         # add the additional loss term definitions
-        self.bin_loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+        self.disaggregation_loss = tf.keras.losses.Huber()
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
@@ -56,16 +56,16 @@ class LearnHardWay(DefaultOptimizer):
 
             # define the loss of the disaggregation
             z_pred_list = self.disaggregation_model(y_pred, training=True)
-            loss_z = tf.reduce_mean([self.bin_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
+            loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
             if self.config['lhw_mode'] == 'lhw':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -tf.sigmoid(loss_z)
+                loss_disaggregation_model = -loss_z
             elif self.config['lhw_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lhw_mode'] == 'max':
                 loss_prediction_model = loss_y
-                loss_disaggregation_model = -tf.sigmoid(loss_z)
+                loss_disaggregation_model = -loss_z
 
         # update the prediction model
         prediction_model_weights = self.prediction_model.trainable_variables
@@ -77,9 +77,9 @@ class LearnHardWay(DefaultOptimizer):
             disaggregation_model_weights = self.disaggregation_model.trainable_variables
             disaggregation_gradients = tape.gradient(loss_disaggregation_model, disaggregation_model_weights)
             self.disaggregation_optimizer.apply_gradients(zip(disaggregation_gradients, disaggregation_model_weights))
-            self.disaggregation_loss(loss_z)
 
         # update the metrics
         self.train_loss(loss_y)
         self.train_accuracy(y, y_pred)
+        self.disaggregation_loss_metric(loss_z)
 
