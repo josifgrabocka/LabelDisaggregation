@@ -15,7 +15,10 @@ class LearnEasyWay(DefaultOptimizer):
         h = disaggregator_input
         disaggregation_outputs = []
         for frac in config['disaggregation_layers_fracs']:
-            h = tf.keras.layers.Dense(units=int(frac*self.data_interface.num_classes), activation='softmax')(h)
+            units=int(frac * self.data_interface.num_classes)
+            if units == 0:
+                units = 1
+            h = tf.keras.layers.Dense(units=units, activation='softmax')(h)
             disaggregation_outputs.append(h)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
         self.disaggregation_model.summary()
