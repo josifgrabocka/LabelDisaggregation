@@ -101,7 +101,7 @@ class PredictionModel:
         latent_representation = embedding(model_input)#
         # remove dimensions of 1 from the representation tensor, e.g. MobileNetV3 returns None,1,1,1024 and we convert it to None,1024
         #latent_representation = tf.squeeze(latent_representation, axis=[1, 2])
-        y_pred = tf.keras.layers.Dense(num_classes, activation=None)(latent_representation)
+        y_pred = tf.keras.layers.Dense(num_classes, activation='softmax')(latent_representation)
         self.prediction_model = tf.keras.Model(inputs=model_input, outputs=y_pred)
 
         return self.prediction_model

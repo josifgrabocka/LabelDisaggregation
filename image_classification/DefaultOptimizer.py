@@ -54,7 +54,7 @@ class DefaultOptimizer:
         self.logs_metrics = [self.train_loss, self.train_accuracy, self.test_loss, self.test_accuracy]
 
         # define loss functions
-        self.cat_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+        self.cat_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 
     # the training step of the prediction model
     @tf.function
