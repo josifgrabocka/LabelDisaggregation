@@ -54,6 +54,7 @@ class LearnHardWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
+        # binarize the targets
         z_list = self.disaggregation_model(y, training=False)
         z_list = [tf.round(z) for z in z_list]
 
