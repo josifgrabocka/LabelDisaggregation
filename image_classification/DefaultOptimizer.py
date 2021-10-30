@@ -42,21 +42,23 @@ class DefaultOptimizer:
 
         self.num_epochs = config['num_epochs']
         self.test_frequency = config['test_frequency']
-        self.checkpoint_frequency = config['checkpoint_frequency']
+        self.save_model_frequency = config['checkpoint_frequency']
         # a prefix string for the checkpoint file name, e.g. dataset name, model name
         # if needed to be set outside outside the class after the constructor
-        now = datetime.datetime.now()
-        self.checkpoint_prefix = str(now.year) + '_' + str(now.month) + '_' + str(now.day) + '_' + str(now.hour) \
-                                 + '_' + str(now.minute) + '_' + str(now.second)
-
-        self.save_checkpoints = False
+        self.prediction_model_file_prefix = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + '_prediction_model_' \
+                                            + self.config['model_name'] + '_' + self.config['dataset_name'] + '_' + self.config['learning_style']
+        self.save_models = False
 
         self.logs_metrics = [self.train_loss, self.train_accuracy, self.test_loss, self.test_accuracy]
 
         # define loss functions
         self.cat_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 
-    # the training step of the prediction model
+        # other models that might be used by child classes
+        self.child_classes_models = []
+        self.child_classes_model_file_prefixes = []
+
+        # the training step of the prediction model
     @tf.function
     def train_step(self, x, y):
         with tf.GradientTape() as tape:
@@ -105,8 +107,11 @@ class DefaultOptimizer:
                     metric.reset_states()
 
             # save the checkpoints
-            if self.save_checkpoints:
-                if epoch % self.checkpoint_frequency == 0:
+            if self.save_models:
+                if (epoch+1) % self.save_model_frequency == 0:
                     # save the checkpoints of the prediction and attack models
-                    self.prediction_model.save_weights('./checkpoints/'+self.checkpoint_prefix+'prediction' + '.h5')
+                    self.prediction_model.save_weights('./logs/models/' + self.prediction_model_file_prefix + '_' + str(epoch) + '.h5')
+                    # save other models in the list that might be populated by child classes
+                    for m, prefix in zip(self.child_classes_models, self.child_classes_model_file_prefixes):
+                        m.save_weights('./logs/models/' + prefix + '_' + str(epoch) + '.h5')
 

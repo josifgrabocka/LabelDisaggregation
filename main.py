@@ -24,11 +24,11 @@ args = parser.parse_args()
 config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
           'num_epochs': 100,
-          'eta': 0.0001,
+          'eta': 0.00001,
           'batch_size': 100,
           'test_frequency': 1,
-          'l2_penalty': 0.0001,
-          'checkpoint_frequency': 10}
+          'l2_penalty': 0.00001,
+          'checkpoint_frequency': 20}
 
 # the default image sizes that the models expect
 if args.model == 'MobileNetV2':
@@ -59,6 +59,9 @@ if args.learning_style:
     config['learning_style'] = args.learning_style
 if args.batch_size:
     config['batch_size'] = args.batch_size
+# write the model and dataset name to the config
+config['model_name'] = args.model
+config['dataset_name'] = args.dataset
 
 # load the dataset
 data_interface = DataInterface(config=config)

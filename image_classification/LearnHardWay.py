@@ -2,6 +2,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 from image_classification.DefaultOptimizer import DefaultOptimizer
 import time
+import datetime
 
 
 class LearnHardWay(DefaultOptimizer):
@@ -14,24 +15,10 @@ class LearnHardWay(DefaultOptimizer):
         h = disaggregator_input
         disaggregation_outputs = []
         for frac in config['disaggregation_layers_fracs']:
-            num_neurons = int(frac*self.data_interface.num_classes)
-            h = tf.keras.layers.Dense(units=num_neurons, activation=None)(h)
-            h = tf.keras.layers.BatchNormalization()(h)
-            h = tf.keras.layers.Activation('sigmoid')(h)
-
+            h = tf.keras.layers.Dense(units=int(frac*self.data_interface.num_classes), activation='sigmoid')(h)
             disaggregation_outputs.append(h)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
         self.disaggregation_model.summary()
-
-        # define the decoder network
-        # decoder_input = tf.keras.Input(int(config['disaggregation_layers_fracs'][-1]*self.data_interface.num_classes))
-        # h = decoder_input
-        # for frac in reversed(config['disaggregation_layers_fracs'][:-1]):
-        #     num_neurons = int(frac * self.data_interface.num_classes)
-        #     h = tf.keras.layers.Dense(units=num_neurons, activation='relu')(h)
-        # h = tf.keras.layers.Dense(units=self.data_interface.num_classes, activation='relu')(h)
-        # self.decoder_model = tf.keras.Model(inputs=decoder_input, outputs=h)
-        # self.decoder_model.summary()
 
         #define the additional loss terms metrics
         self.disaggregation_loss = tf.keras.metrics.Mean(name='disaggregation_loss')
@@ -47,8 +34,12 @@ class LearnHardWay(DefaultOptimizer):
         wd = self.l2_penalty * lr_sched(step)
         self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
 
-        #self.disaggregation_optimizer = tf.optimizers.Adam(learning_rate=config['eta'])
-
+        # populate the list of models added by child classes of the DefaultOptimizer, such that the saving of these models
+        # can happen inside the run method of the parent class
+        self.child_classes_models.append(self.disaggregation_model)
+        self.disaggregation_model_file_prefix = datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + '_disaggregation_model_' \
+                                            + self.config['model_name'] + '_' + self.config['dataset_name'] + '_' + self.config['learning_style']
+        self.child_classes_model_file_prefixes.append(self.disaggregation_model_file_prefix)
 
     # the training step for learning the hard way
     @tf.function
@@ -69,7 +60,7 @@ class LearnHardWay(DefaultOptimizer):
             loss_z = tf.reduce_mean([self.bin_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
             loss_prediction_model = loss_y + loss_z
-            loss_disaggregation_model = -tf.sigmoid(loss_z)
+            loss_disaggregation_model = -loss_z
 
         # update the prediction model
         prediction_model_weights = self.prediction_model.trainable_variables
@@ -85,3 +76,4 @@ class LearnHardWay(DefaultOptimizer):
         self.train_loss(loss_y)
         self.train_accuracy(y, y_pred)
         self.disaggregation_loss(loss_z)
+
