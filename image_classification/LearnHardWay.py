@@ -15,7 +15,7 @@ class LearnHardWay(DefaultOptimizer):
         h = disaggregator_input
         disaggregation_outputs = []
         for frac in config['disaggregation_layers_fracs']:
-            h = tf.keras.layers.Dense(units=int(frac*self.data_interface.num_classes), activation='sigmoid')(h)
+            h = tf.keras.layers.Dense(units=int(frac*self.data_interface.num_classes), activation='softmax')(h)
             disaggregation_outputs.append(h)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
         self.disaggregation_model.summary()
@@ -24,7 +24,7 @@ class LearnHardWay(DefaultOptimizer):
         self.disaggregation_loss_metric = tf.keras.metrics.Mean(name='disaggregation_loss')
         self.logs_metrics.append(self.disaggregation_loss_metric)
         # add the additional loss term definitions
-        self.disaggregation_loss = tf.keras.losses.Huber()
+        self.disaggregation_loss = tf.keras.losses.CategoricalCrossentropy()
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
@@ -33,6 +33,11 @@ class LearnHardWay(DefaultOptimizer):
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
         self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+
+        self.dis_loss_step = tf.Variable(0, trainable=False)
+        self.dis_loss_lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
+                                                                     t_mul=1,
+                                                                     first_decay_steps=self.first_decay_steps)
 
         # populate the list of models added by child classes of the DefaultOptimizer, such that the saving of these models
         # can happen inside the run method of the parent class
@@ -45,9 +50,9 @@ class LearnHardWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-        # binarize the targets
+        # one-hot encode the latent probabilities of the true target
         z_true_list = self.disaggregation_model(y, training=False)
-        z_true_list = [tf.round(z) for z in z_true_list]
+        z_true_list = [tf.one_hot(tf.argmax(z, axis=1), depth=self.data_interface.num_classes) for z in z_true_list]
 
         with tf.GradientTape(persistent=True) as tape:
 
@@ -60,12 +65,12 @@ class LearnHardWay(DefaultOptimizer):
 
             if self.config['lhw_mode'] == 'lhw':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -loss_z
+                loss_disaggregation_model = loss_z
             elif self.config['lhw_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lhw_mode'] == 'max':
                 loss_prediction_model = loss_y
-                loss_disaggregation_model = -loss_z
+                loss_disaggregation_model = loss_z
 
         # update the prediction model
         prediction_model_weights = self.prediction_model.trainable_variables
