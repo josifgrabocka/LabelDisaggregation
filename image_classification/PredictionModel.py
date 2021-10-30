@@ -17,7 +17,6 @@ class PredictionModel:
             pretrained_embedding = tf.keras.applications.mobilenet_v2.MobileNetV2(weights=weights,
                                                                                   include_top=False,
                                                                                   pooling='avg',
-                                                                                  alpha=0.35,
                                                                                   input_shape=self.default_input_size)
         elif model_name == 'MobileNetV3Small':
             pretrained_embedding = tf.keras.applications.MobileNetV3Small(include_top=False,

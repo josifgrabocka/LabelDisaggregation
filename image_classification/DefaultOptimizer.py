@@ -58,13 +58,12 @@ class DefaultOptimizer:
         self.child_classes_models = []
         self.child_classes_model_file_prefixes = []
 
-        # the training step of the prediction model
+    # the training step of the prediction model
     @tf.function
     def train_step(self, x, y):
         with tf.GradientTape() as tape:
             y_pred = self.prediction_model(x, training=True)
             loss_pred = tf.reduce_mean(self.cat_loss(y_true=y, y_pred=y_pred))
-#
 
         weights = self.prediction_model.trainable_variables
         prediction_gradients = tape.gradient(loss_pred, weights)
