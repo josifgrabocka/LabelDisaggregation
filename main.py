@@ -1,7 +1,7 @@
 from image_classification.DataInterface import DataInterface
 from image_classification.PredictionModel import PredictionModel
 from image_classification.DefaultOptimizer import DefaultOptimizer
-from image_classification.LearnHardWay import LearnHardWay
+from image_classification.LearnEasyWay import LearnEasyWay
 import argparse
 import tensorflow as tf
 
@@ -10,11 +10,11 @@ import tensorflow as tf
 parser = argparse.ArgumentParser()
 parser.add_argument("dataset", help="The name of the tfds dataset, e.g. {mnist, cifar10}")
 parser.add_argument("model", help="The name of the model, e.g. {DenseNet121, NASNetMobile}")
-parser.add_argument('--learning_style', help='Style: {hard, normal}')
+parser.add_argument('--learning_style', help='Style: {easy, normal}')
 parser.add_argument('--epochs', help='Number of epochs', type=int)
 parser.add_argument('--batch_size', help='Batch size', type=int)
 parser.add_argument('--eta', help='Learning rate', type=float)
-parser.add_argument('--lhw_mode', help='normal, random, no adversarial')
+parser.add_argument('--lew_mode', help='normal, random, min')
 parser.add_argument('--image_size', help='Input image size', nargs='+', type=int)
 parser.add_argument("--checkpoints_load_prefix", help="The path of the dataset from which to init the checkpoints")
 parser.add_argument("--checkpoints_save_prefix", help="The path of the dataset where to save the checkpoints")
@@ -77,9 +77,9 @@ m.summary()
 if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
-elif config['learning_style'] == 'hard':
+elif config['learning_style'] == 'easy':
     config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0]
-    if args.lhw_mode:
-        config['lhw_mode'] = args.lhw_mode
-    lhw = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
-    lhw.run()
+    if args.lew_mode:
+        config['lew_mode'] = args.lew_mode
+    lew = LearnEasyWay(prediction_model=m, config=config, data_interface=data_interface)
+    lew.run()

@@ -5,10 +5,10 @@ import time
 import datetime
 
 
-class LearnHardWay(DefaultOptimizer):
+class LearnEasyWay(DefaultOptimizer):
 
     def __init__(self, prediction_model, data_interface, config):
-        super(LearnHardWay, self).__init__(prediction_model=prediction_model, data_interface=data_interface, config=config)
+        super(LearnEasyWay, self).__init__(prediction_model=prediction_model, data_interface=data_interface, config=config)
 
         # define the label disaggregation model
         disaggregator_input = tf.keras.Input(self.data_interface.num_classes)
@@ -46,7 +46,7 @@ class LearnHardWay(DefaultOptimizer):
                                             + self.config['model_name'] + '_' + self.config['dataset_name'] + '_' + self.config['learning_style']
         self.child_classes_model_file_prefixes.append(self.disaggregation_model_file_prefix)
 
-    # the training step for learning the hard way
+    # the training step for learning the easy way
     @tf.function
     def train_step(self, x, y):
 
@@ -63,12 +63,12 @@ class LearnHardWay(DefaultOptimizer):
             z_pred_list = self.disaggregation_model(y_pred, training=True)
             loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
-            if self.config['lhw_mode'] == 'lhw':
+            if self.config['lew_mode'] == 'lew':
                 loss_prediction_model = loss_y + loss_z
                 loss_disaggregation_model = loss_z
-            elif self.config['lhw_mode'] == 'random':
+            elif self.config['lew_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
-            elif self.config['lhw_mode'] == 'max':
+            elif self.config['lew_mode'] == 'min':
                 loss_prediction_model = loss_y
                 loss_disaggregation_model = loss_z
 
@@ -78,7 +78,7 @@ class LearnHardWay(DefaultOptimizer):
         self.prediction_optimizer.apply_gradients(zip(prediction_gradients, prediction_model_weights))
 
         # update the disaggregation model
-        if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'max':
+        if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'min':
             disaggregation_model_weights = self.disaggregation_model.trainable_variables
             disaggregation_gradients = tape.gradient(loss_disaggregation_model, disaggregation_model_weights)
             self.disaggregation_optimizer.apply_gradients(zip(disaggregation_gradients, disaggregation_model_weights))
