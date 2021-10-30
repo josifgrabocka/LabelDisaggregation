@@ -55,12 +55,17 @@ class LearnHardWay(DefaultOptimizer):
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-
             z_pred_list = self.disaggregation_model(y_pred, training=True)
             loss_z = tf.reduce_mean([self.bin_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
-            loss_prediction_model = loss_y + loss_z
-            loss_disaggregation_model = -tf.sigmoid(loss_z)
+            if self.config['lhw_mode'] == 'lhw':
+                loss_prediction_model = loss_y + loss_z
+                loss_disaggregation_model = -tf.sigmoid(loss_z)
+            elif self.config['lhw_mode'] == 'random':
+                loss_prediction_model = loss_y + loss_z
+            elif self.config['lhw_mode'] == 'max':
+                loss_prediction_model = loss_y
+                loss_disaggregation_model = -tf.sigmoid(loss_z)
 
         # update the prediction model
         prediction_model_weights = self.prediction_model.trainable_variables
@@ -68,12 +73,13 @@ class LearnHardWay(DefaultOptimizer):
         self.prediction_optimizer.apply_gradients(zip(prediction_gradients, prediction_model_weights))
 
         # update the disaggregation model
-        disaggregation_model_weights = self.disaggregation_model.trainable_variables
-        disaggregation_gradients = tape.gradient(loss_disaggregation_model, disaggregation_model_weights)
-        self.disaggregation_optimizer.apply_gradients(zip(disaggregation_gradients, disaggregation_model_weights))
+        if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'max':
+            disaggregation_model_weights = self.disaggregation_model.trainable_variables
+            disaggregation_gradients = tape.gradient(loss_disaggregation_model, disaggregation_model_weights)
+            self.disaggregation_optimizer.apply_gradients(zip(disaggregation_gradients, disaggregation_model_weights))
+            self.disaggregation_loss(loss_z)
 
         # update the metrics
         self.train_loss(loss_y)
         self.train_accuracy(y, y_pred)
-        self.disaggregation_loss(loss_z)
 
