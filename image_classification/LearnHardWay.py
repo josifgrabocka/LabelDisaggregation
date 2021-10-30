@@ -54,9 +54,8 @@ class LearnHardWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-        z_list = self.disaggregation_model(y, training=False)
-
         with tf.GradientTape(persistent=True) as tape:
+            z_list = self.disaggregation_model(y, training=True)
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
