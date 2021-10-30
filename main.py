@@ -21,7 +21,7 @@ parser.add_argument("--checkpoints_save_prefix", help="The path of the dataset w
 
 args = parser.parse_args()
 
-config = {'buffer_size': 10000,
+config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
           'num_epochs': 100,
           'eta': 0.0001,

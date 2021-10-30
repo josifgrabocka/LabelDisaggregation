@@ -55,8 +55,8 @@ class LearnHardWay(DefaultOptimizer):
     def train_step(self, x, y):
 
         # binarize the targets
-        z_list = self.disaggregation_model(y, training=False)
-        z_list = [tf.round(z) for z in z_list]
+        z_true_list = self.disaggregation_model(y, training=False)
+        z_true_list = [tf.round(z) for z in z_true_list]
 
         with tf.GradientTape(persistent=True) as tape:
 
@@ -66,7 +66,7 @@ class LearnHardWay(DefaultOptimizer):
             # define the loss of the disaggregation
 
             z_pred_list = self.disaggregation_model(y_pred, training=True)
-            loss_z = tf.reduce_mean([self.bin_loss(y_true=z, y_pred=z_pred) for z, z_pred in zip(z_list, z_pred_list)])
+            loss_z = tf.reduce_mean([self.bin_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
             loss_prediction_model = loss_y + loss_z
             loss_disaggregation_model = -tf.sigmoid(loss_z)
