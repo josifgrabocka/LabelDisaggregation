@@ -59,9 +59,9 @@ class LearnEasyWay(DefaultOptimizer):
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-
             z_pred_list = self.disaggregation_model(y_pred, training=True)
-            loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
+            loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
+                                     for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
             if self.config['lew_mode'] == 'lew':
                 loss_prediction_model = loss_y + loss_z
