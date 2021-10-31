@@ -19,6 +19,7 @@ class LearnEasyWay(DefaultOptimizer):
             units=int(frac * self.data_interface.num_classes)
             if units == 0:
                 units = 1
+            h = tf.keras.layers.BatchNormalization()(h)
             h = tf.keras.layers.Dense(units=units, activation='relu')(h)
             disaggregation_outputs.append(h)
             self.num_disaggregator_layer_units.append(units)
