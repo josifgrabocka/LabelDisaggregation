@@ -52,11 +52,11 @@ class LearnEasyWay(DefaultOptimizer):
 
         with tf.GradientTape(persistent=True) as tape:
 
-            z_true_list = self.disaggregation_model(y, training=True)
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
+            z_true_list = self.disaggregation_model(y, training=True)
             z_pred_list = self.disaggregation_model(y_pred, training=True)
             loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
