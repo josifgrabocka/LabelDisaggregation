@@ -19,7 +19,7 @@ class LearnEasyWay(DefaultOptimizer):
             units=int(frac * self.data_interface.num_classes)
             if units == 0:
                 units = 1
-            h = tf.keras.layers.Dense(units=units, activation='softmax')(h)
+            h = tf.keras.layers.Dense(units=units, activation='sigmoid')(h)
             disaggregation_outputs.append(h)
             self.num_disaggregator_layer_units.append(units)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
@@ -29,20 +29,15 @@ class LearnEasyWay(DefaultOptimizer):
         self.disaggregation_loss_metric = tf.keras.metrics.Mean(name='disaggregation_loss')
         self.logs_metrics.append(self.disaggregation_loss_metric)
         # add the additional loss term definitions
-        self.disaggregation_loss = tf.keras.losses.CategoricalCrossentropy()
+        self.disaggregation_loss = tf.keras.losses.BinaryCrossentropy()
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=10*config['eta'],
                                                                      t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
         self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
-
-        self.dis_loss_step = tf.Variable(0, trainable=False)
-        self.dis_loss_lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
-                                                                     t_mul=1,
-                                                                     first_decay_steps=self.first_decay_steps)
 
         # populate the list of models added by child classes of the DefaultOptimizer, such that the saving of these models
         # can happen inside the run method of the parent class
@@ -55,13 +50,9 @@ class LearnEasyWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-        # one-hot encode the latent probabilities of the true target
-        z_true_list = self.disaggregation_model(y, training=False)
-        z_true_list = [tf.one_hot(tf.argmax(z, axis=1), depth=units)
-                       for z, units in zip(z_true_list, self.num_disaggregator_layer_units)]
-
         with tf.GradientTape(persistent=True) as tape:
 
+            z_true_list = self.disaggregation_model(y, training=True)
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 

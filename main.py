@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
-          'num_epochs': 100,
+          'num_epochs': 200,
           'eta': 0.0001,
           'batch_size': 100,
           'test_frequency': 1,
@@ -78,7 +78,7 @@ if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
 elif config['learning_style'] == 'easy':
-    config['disaggregation_layers_fracs'] = [0.8, 0.6, 0.4, 0.2]
+    config['disaggregation_layers_fracs'] = [2.0, 1.5, 1.0, 0.5]
     if args.lew_mode:
         config['lew_mode'] = args.lew_mode
     lew = LearnEasyWay(prediction_model=m, config=config, data_interface=data_interface)

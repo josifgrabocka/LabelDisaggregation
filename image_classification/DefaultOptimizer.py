@@ -14,11 +14,12 @@ class DefaultOptimizer:
         self.config = config
         self.l2_penalty=config["l2_penalty"]
 
+        self.num_restart_epochs = 10
         self.first_decay_steps = 0
         for _ in self.train_ds:
             self.first_decay_steps += 1
         # make the first steps for X=10 epochs
-        self.first_decay_steps *= 10
+        self.first_decay_steps *= self.num_restart_epochs
 
         # create the initializers
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
@@ -112,3 +113,4 @@ class DefaultOptimizer:
                     for m, prefix in zip(self.child_classes_models, self.child_classes_model_file_prefixes):
                         m.save_weights('./logs/models/' + prefix + '_' + str(epoch) + '.h5')
 
+                    # save models for the snapshot ensemble
