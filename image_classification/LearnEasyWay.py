@@ -68,7 +68,7 @@ class LearnEasyWay(DefaultOptimizer):
             elif self.config['lew_mode'] == 'min':
                 loss_disaggregation_model = -tf.tanh(loss_z)
 
-        # update the prediction model
+        # update the prediction model params
         if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'random':
             prediction_model_weights = self.prediction_model.trainable_variables
             prediction_gradients = tape.gradient(loss_prediction_model, prediction_model_weights)
