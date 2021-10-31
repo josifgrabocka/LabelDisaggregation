@@ -33,7 +33,7 @@ class LearnEasyWay(DefaultOptimizer):
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=10*config['eta'],
                                                                      t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
@@ -50,23 +50,26 @@ class LearnEasyWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
+        z_true_list = self.disaggregation_model(y, training=False)
+        z_true_list = [tf.round(tf.sigmoid(z)) for z in z_true_list]
+
         with tf.GradientTape(persistent=True) as tape:
 
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-            z_true_list = self.disaggregation_model(y, training=True)
+
             z_pred_list = self.disaggregation_model(y_pred, training=True)
             loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred) for z_true, z_pred in zip(z_true_list, z_pred_list)])
 
             if self.config['lew_mode'] == 'lew':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -tf.tanh(loss_z)
+                loss_disaggregation_model = -loss_z
             elif self.config['lew_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lew_mode'] == 'min':
-                loss_disaggregation_model = -tf.tanh(loss_z)
+                loss_disaggregation_model = -loss_z
 
         # update the prediction model params
         if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'random':
