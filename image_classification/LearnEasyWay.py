@@ -19,7 +19,7 @@ class LearnEasyWay(DefaultOptimizer):
             units=int(frac * self.data_interface.num_classes)
             if units == 0:
                 units = 1
-            h = tf.keras.layers.Dense(units=units, activation='sigmoid')(h)
+            h = tf.keras.layers.Dense(units=units, activation='relu')(h)
             disaggregation_outputs.append(h)
             self.num_disaggregator_layer_units.append(units)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
@@ -29,7 +29,7 @@ class LearnEasyWay(DefaultOptimizer):
         self.disaggregation_loss_metric = tf.keras.metrics.Mean(name='disaggregation_loss')
         self.logs_metrics.append(self.disaggregation_loss_metric)
         # add the additional loss term definitions
-        self.disaggregation_loss = tf.keras.losses.BinaryCrossentropy()
+        self.disaggregation_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
@@ -85,43 +85,39 @@ class LearnEasyWay(DefaultOptimizer):
         self.train_accuracy(y, y_pred)
         self.disaggregation_loss_metric(loss_z)
 
-    def run(self):
-
-        print('Pretrain the disaggregator with a toy model ...')
-
-        model = self.config['model_name']
-        num_epochs = self.config['num_epochs']
-        lew_mode = self.config['lew_mode']
-        eta = self.config['eta']
-
-        # set some mini configurations
-        self.config['model_name'] = 'mini'
-        self.config['lhw_mode'] = 'min'
-        self.config['num_epochs'] = 200
-        self.config['eta'] = 0.0001
-
-        super().run()
-
-        print('Now learning the real model ...')
-
-        self.config['model_name'] = model
-        self.config['lew_mode'] = lew_mode
-        self.config['num_epochs'] = num_epochs
-        self.config['eta'] = eta
-
-        # reinit the optimizers
-
-        step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=self.config['eta'],
-                                                                     t_mul=1.0, first_decay_steps=self.first_decay_steps)
-        wd = self.l2_penalty * lr_sched(step)
-
-        self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
-
-        step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=self.config['eta'],
-                                                                     t_mul=1, first_decay_steps=self.first_decay_steps)
-        wd = self.l2_penalty * lr_sched(step)
-        self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
-
-        super().run()
+    # def run(self):
+    #
+    #     print('Pretrain the disaggregator with a toy model ...')
+    #
+    #     model = self.config['model_name']
+    #     num_epochs = self.config['num_epochs']
+    #     lew_mode = self.config['lew_mode']
+    #     eta = self.config['eta']
+    #
+    #     # set some mini configurations
+    #     self.config['model_name'] = 'mini'
+    #     self.config['lhw_mode'] = 'lew'
+    #     self.config['num_epochs'] = 100
+    #     self.config['eta'] = 0.001
+    #
+    #     super().run()
+    #
+    #     print('Now learning the real model ...')
+    #
+    #     self.config['model_name'] = model
+    #     self.config['lew_mode'] = lew_mode
+    #     self.config['num_epochs'] = num_epochs
+    #     self.config['eta'] = eta
+    #
+    #     # reinit the optimizers
+    #     step = tf.Variable(0, trainable=False)
+    #     lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=self.config['eta'], t_mul=1.0, first_decay_steps=self.first_decay_steps)
+    #     wd = self.l2_penalty * lr_sched(step)
+    #     self.prediction_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+    #
+    #     step = tf.Variable(0, trainable=False)
+    #     lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=self.config['eta'], t_mul=1, first_decay_steps=self.first_decay_steps)
+    #     wd = self.l2_penalty * lr_sched(step)
+    #     self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+    #
+    #     super().run()
