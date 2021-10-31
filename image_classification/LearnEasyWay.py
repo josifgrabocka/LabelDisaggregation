@@ -50,11 +50,9 @@ class LearnEasyWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-        z_true_list = self.disaggregation_model(y, training=False)
-        z_true_list = [ tf.round(tf.sigmoid(z_true)) for z_true in z_true_list ]
-
         with tf.GradientTape(persistent=True) as tape:
 
+            z_true_list = self.disaggregation_model(y, training=True)
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
@@ -64,11 +62,11 @@ class LearnEasyWay(DefaultOptimizer):
 
             if self.config['lew_mode'] == 'lew':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -loss_z
+                loss_disaggregation_model = -tf.tanh(loss_z)
             elif self.config['lew_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lew_mode'] == 'min':
-                loss_disaggregation_model = -loss_z
+                loss_disaggregation_model = -tf.tanh(loss_z)
 
         # update the prediction model
         if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'random':
