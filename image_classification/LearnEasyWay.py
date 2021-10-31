@@ -66,11 +66,11 @@ class LearnEasyWay(DefaultOptimizer):
 
             if self.config['lew_mode'] == 'lew':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -tf.sigmoid(loss_z)
+                loss_disaggregation_model = -tf.tanh(loss_z)
             elif self.config['lew_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lew_mode'] == 'min':
-                loss_disaggregation_model = -tf.sigmoid(loss_z)
+                loss_disaggregation_model = -tf.tanh(loss_z)
 
         # update the prediction model params
         if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'random':
