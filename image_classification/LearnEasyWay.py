@@ -33,7 +33,7 @@ class LearnEasyWay(DefaultOptimizer):
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=10*config['eta'],
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
                                                                      t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
@@ -84,3 +84,28 @@ class LearnEasyWay(DefaultOptimizer):
         self.train_loss(loss_y)
         self.train_accuracy(y, y_pred)
         self.disaggregation_loss_metric(loss_z)
+
+    def run(self):
+
+        print('Pretrain the disaggregator with a toy model ...')
+
+        model = self.config['model_name']
+        num_epochs = self.config['num_epochs']
+        lew_mode = self.config['lew_mode']
+        eta = self.config['eta']
+
+        # set some mini configurations
+        self.config['model_name'] = 'mini'
+        self.config['lhw_mode'] = 'min'
+        self.config['num_epochs'] = 100
+        self.config['eta'] = 0.001
+
+        super().run()
+
+        print('Now learning the real model ...')
+
+        self.config['model_name'] = model
+        self.config['lew_mode'] = lew_mode
+        self.config['num_epochs'] = num_epochs
+        self.config['eta'] = eta
+        super().run()
