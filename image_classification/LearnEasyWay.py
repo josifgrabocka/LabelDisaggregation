@@ -14,12 +14,14 @@ class LearnEasyWay(DefaultOptimizer):
         disaggregator_input = tf.keras.Input(self.data_interface.num_classes)
         h = disaggregator_input
         disaggregation_outputs = []
+        self.num_disaggregator_units = []
         for frac in config['disaggregation_layers_fracs']:
             units=int(frac * self.data_interface.num_classes)
             if units == 0:
                 units = 1
             h = tf.keras.layers.Dense(units=units, activation='softmax')(h)
             disaggregation_outputs.append(h)
+            self.num_disaggregator_units.append(units)
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
         self.disaggregation_model.summary()
 
@@ -55,7 +57,8 @@ class LearnEasyWay(DefaultOptimizer):
 
         # one-hot encode the latent probabilities of the true target
         z_true_list = self.disaggregation_model(y, training=False)
-        z_true_list = [tf.one_hot(tf.argmax(z, axis=1), depth=self.data_interface.num_classes) for z in z_true_list]
+        z_true_list = [tf.one_hot(tf.argmax(z, axis=1), depth=units)
+                       for z, units in zip(z_true_list, self.num_disaggregator_units)]
 
         with tf.GradientTape(persistent=True) as tape:
 
