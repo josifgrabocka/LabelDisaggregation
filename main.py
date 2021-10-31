@@ -78,7 +78,7 @@ if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
 elif config['learning_style'] == 'easy':
-    config['disaggregation_layers_fracs'] = [4.0, 2.0, 1.0, 0.5]
+    config['disaggregation_layers_fracs'] = [8.0, 4.0, 2.0, 1.0]
     if args.lew_mode:
         config['lew_mode'] = args.lew_mode
     lew = LearnEasyWay(prediction_model=m, config=config, data_interface=data_interface)
