@@ -68,7 +68,7 @@ class PredictionModel:
                                                                                      pooling='avg',
                                                                                      input_shape=self.default_input_size)
         elif model_name == 'mini':
-            num_filters = 32
+            num_filters = 8
             kernel_size = 3
             pool_size = 2
 

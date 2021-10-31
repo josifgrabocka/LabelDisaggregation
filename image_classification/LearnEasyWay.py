@@ -33,7 +33,7 @@ class LearnEasyWay(DefaultOptimizer):
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=10*config['eta'],
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
                                                                      t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
@@ -66,13 +66,13 @@ class LearnEasyWay(DefaultOptimizer):
             elif self.config['lew_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lew_mode'] == 'min':
-                loss_prediction_model = loss_y
                 loss_disaggregation_model = -loss_z
 
         # update the prediction model
-        prediction_model_weights = self.prediction_model.trainable_variables
-        prediction_gradients = tape.gradient(loss_prediction_model, prediction_model_weights)
-        self.prediction_optimizer.apply_gradients(zip(prediction_gradients, prediction_model_weights))
+        if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'random':
+            prediction_model_weights = self.prediction_model.trainable_variables
+            prediction_gradients = tape.gradient(loss_prediction_model, prediction_model_weights)
+            self.prediction_optimizer.apply_gradients(zip(prediction_gradients, prediction_model_weights))
 
         # update the disaggregation model
         if self.config['lew_mode'] == 'lew' or self.config['lew_mode'] == 'min':
@@ -84,4 +84,3 @@ class LearnEasyWay(DefaultOptimizer):
         self.train_loss(loss_y)
         self.train_accuracy(y, y_pred)
         self.disaggregation_loss_metric(loss_z)
-
