@@ -108,4 +108,13 @@ class LearnEasyWay(DefaultOptimizer):
         self.config['lew_mode'] = lew_mode
         self.config['num_epochs'] = num_epochs
         self.config['eta'] = eta
+
+        # reinit the optimizer
+        step = tf.Variable(0, trainable=False)
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=self.config['eta'],
+                                                                     t_mul=1,
+                                                                     first_decay_steps=self.first_decay_steps)
+        wd = self.l2_penalty * lr_sched(step)
+        self.disaggregation_optimizer = tfa.optimizers.AdamW(learning_rate=lr_sched, weight_decay=wd)
+
         super().run()
