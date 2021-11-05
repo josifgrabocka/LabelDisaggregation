@@ -34,7 +34,7 @@ class LearnEasyWay(DefaultOptimizer):
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
-        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=0.3*config['eta'],
+        lr_sched = tf.keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=config['eta'],
                                                                      t_mul=1,
                                                                      first_decay_steps=self.first_decay_steps)
         wd = self.l2_penalty * lr_sched(step)
@@ -51,8 +51,8 @@ class LearnEasyWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-        z_true_list = self.disaggregation_model(y, training=False)
-        z_true_list = [tf.round(tf.sigmoid(z)) for z in z_true_list]
+
+        #z_true_list = [tf.round(tf.sigmoid(z)) for z in z_true_list]
 
         with tf.GradientTape(persistent=True) as tape:
 
@@ -60,6 +60,7 @@ class LearnEasyWay(DefaultOptimizer):
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
+            z_true_list = self.disaggregation_model(y, training=True)
             z_pred_list = self.disaggregation_model(y_pred, training=True)
             loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
                                      for z_true, z_pred in zip(z_true_list, z_pred_list)])
