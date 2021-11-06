@@ -14,7 +14,7 @@ parser.add_argument('--learning_style', help='Style: {easy, normal}')
 parser.add_argument('--epochs', help='Number of epochs', type=int)
 parser.add_argument('--batch_size', help='Batch size', type=int)
 parser.add_argument('--eta', help='Learning rate', type=float)
-parser.add_argument('--lhw_mode', help='normal, random, min')
+parser.add_argument('--lhw_mode', help='lhw, random, max')
 parser.add_argument('--image_size', help='Input image size', nargs='+', type=int)
 parser.add_argument("--checkpoints_load_prefix", help="The path of the dataset from which to init the checkpoints")
 parser.add_argument("--checkpoints_save_prefix", help="The path of the dataset where to save the checkpoints")
@@ -79,7 +79,7 @@ if config['learning_style'] == 'normal':
     de.run()
 elif config['learning_style'] == 'hard':
     config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    if args.lew_mode:
+    if args.lhw_mode:
         config['lhw_mode'] = args.lhw_mode
     lew = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
     lew.run()

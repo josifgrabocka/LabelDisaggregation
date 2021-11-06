@@ -54,9 +54,6 @@ class LearnHardWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
-
-        #z_true_list = [tf.round(tf.sigmoid(z)) for z in z_true_list]
-
         with tf.GradientTape(persistent=True) as tape:
 
             y_pred = self.prediction_model(x, training=True)
@@ -83,7 +80,7 @@ class LearnHardWay(DefaultOptimizer):
             self.prediction_optimizer.apply_gradients(zip(prediction_gradients, prediction_model_weights))
 
         # update the disaggregation model
-        if self.config['lhw_mode'] == 'lew' or self.config['lhw_mode'] == 'max':
+        if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'max':
             disaggregation_model_weights = self.disaggregation_model.trainable_variables
             disaggregation_gradients = tape.gradient(loss_disaggregation_model, disaggregation_model_weights)
             self.disaggregation_optimizer.apply_gradients(zip(disaggregation_gradients, disaggregation_model_weights))
