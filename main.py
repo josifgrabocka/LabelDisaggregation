@@ -27,7 +27,7 @@ config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
           'num_epochs': 100,
           'eta': 0.0001,
-          'gamma': 3.0,
+          'gamma': 5.0,
           'batch_size': 100,
           'test_frequency': 1,
           'l2_penalty': 0.0001,
@@ -82,7 +82,7 @@ if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
 elif config['learning_style'] == 'hard':
-    config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0]
     if args.lhw_mode:
         config['lhw_mode'] = args.lhw_mode
     lew = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
