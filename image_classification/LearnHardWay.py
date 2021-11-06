@@ -47,6 +47,9 @@ class LearnHardWay(DefaultOptimizer):
                                             + self.config['model_name'] + '_' + self.config['dataset_name'] + '_' + self.config['learning_style']
         self.child_classes_model_file_prefixes.append(self.disaggregation_model_file_prefix)
 
+        # the hyper-parameter for the strength of
+        self.disaggregation_gamma = 10
+
     # the training step for learning the hard way
     @tf.function
     def train_step(self, x, y):
@@ -67,11 +70,11 @@ class LearnHardWay(DefaultOptimizer):
 
             if self.config['lhw_mode'] == 'lhw':
                 loss_prediction_model = loss_y + loss_z
-                loss_disaggregation_model = -tf.tanh(loss_z)
+                loss_disaggregation_model = -tf.tanh(self.disaggregation_gamma*loss_z)
             elif self.config['lhw_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lhw_mode'] == 'max':
-                loss_disaggregation_model = -tf.tanh(loss_z)
+                loss_disaggregation_model = -tf.tanh(self.disaggregation_gamma*loss_z)
 
         # update the prediction model params
         if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'random':
