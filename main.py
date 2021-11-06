@@ -1,7 +1,7 @@
 from image_classification.DataInterface import DataInterface
 from image_classification.PredictionModel import PredictionModel
 from image_classification.DefaultOptimizer import DefaultOptimizer
-from image_classification.LearnEasyWay import LearnEasyWay
+from image_classification.LearnHardWay import LearnHardWay
 import argparse
 import tensorflow as tf
 
@@ -77,9 +77,9 @@ m.summary()
 if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
-elif config['learning_style'] == 'easy':
+elif config['learning_style'] == 'hard':
     config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
     if args.lew_mode:
-        config['lew_mode'] = args.lew_mode
-    lew = LearnEasyWay(prediction_model=m, config=config, data_interface=data_interface)
+        config['lhw_mode'] = args.lhw_mode
+    lew = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)
     lew.run()
