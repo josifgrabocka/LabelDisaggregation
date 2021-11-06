@@ -13,7 +13,6 @@ class LearnHardWay(DefaultOptimizer):
         # define the label disaggregation model
         disaggregator_input = tf.keras.Input(self.data_interface.num_classes)
         h = disaggregator_input
-        disaggregation_outputs = []
         self.num_disaggregator_layer_units = []
         for frac in config['disaggregation_layers_fracs']:
             units=int(frac * self.data_interface.num_classes)
@@ -21,9 +20,7 @@ class LearnHardWay(DefaultOptimizer):
                 units = 1
             h = tf.keras.layers.BatchNormalization()(h)
             h = tf.keras.layers.Dense(units=units, activation='relu')(h)
-            disaggregation_outputs.append(h)
-            self.num_disaggregator_layer_units.append(units)
-        self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=disaggregation_outputs)
+        self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_model.summary()
 
         #define the additional loss terms metrics
@@ -60,10 +57,9 @@ class LearnHardWay(DefaultOptimizer):
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-            z_true_list = self.disaggregation_model(y, training=True)
-            z_pred_list = self.disaggregation_model(y_pred, training=True)
-            loss_z = tf.reduce_mean([self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
-                                     for z_true, z_pred in zip(z_true_list, z_pred_list)])
+            z_true = self.disaggregation_model(y, training=True)
+            z_pred = self.disaggregation_model(y_pred, training=True)
+            loss_z = self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
 
             if self.config['lhw_mode'] == 'lhw':
                 loss_prediction_model = loss_y + loss_z
