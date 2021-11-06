@@ -14,6 +14,7 @@ parser.add_argument('--learning_style', help='Style: {easy, normal}')
 parser.add_argument('--epochs', help='Number of epochs', type=int)
 parser.add_argument('--batch_size', help='Batch size', type=int)
 parser.add_argument('--eta', help='Learning rate', type=float)
+parser.add_argument('--gamma', help='Learning rate', type=float)
 parser.add_argument('--lhw_mode', help='lhw, random, max')
 parser.add_argument('--image_size', help='Input image size', nargs='+', type=int)
 parser.add_argument("--checkpoints_load_prefix", help="The path of the dataset from which to init the checkpoints")
@@ -25,6 +26,7 @@ config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
           'num_epochs': 200,
           'eta': 0.001,
+          'gamma': 3.0,
           'batch_size': 100,
           'test_frequency': 1,
           'l2_penalty': 0.00001,
@@ -62,6 +64,7 @@ if args.batch_size:
 # write the model and dataset name to the config
 config['model_name'] = args.model
 config['dataset_name'] = args.dataset
+
 
 # load the dataset
 data_interface = DataInterface(config=config)

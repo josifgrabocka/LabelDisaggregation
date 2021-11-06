@@ -48,7 +48,7 @@ class LearnHardWay(DefaultOptimizer):
         self.child_classes_model_file_prefixes.append(self.disaggregation_model_file_prefix)
 
         # the hyper-parameter for the strength of
-        self.disaggregation_gamma = 10
+        self.disaggregation_gamma = self.config['gamma']
 
     # the training step for learning the hard way
     @tf.function
