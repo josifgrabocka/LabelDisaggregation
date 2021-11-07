@@ -26,7 +26,7 @@ args = parser.parse_args()
 config = {'buffer_size': 5000,
           'image_size': (224, 224, 3),
           'num_epochs': 200,
-          'eta': 0.0003,
+          'eta': 0.00003,
           'gamma': 10.0,
           'batch_size': 100,
           'test_frequency': 1,
