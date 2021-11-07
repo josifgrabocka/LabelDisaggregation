@@ -15,7 +15,7 @@ class DataInterface:
         self.min_val = 100000.0
         self.max_val = -100000.0
 
-        self.rand_aug = iaa.RandAugment()
+        self.rand_aug = iaa.RandAugment(n=3, m=7)
 
     # load the demanded dataset
     def load(self, dataset_name):
