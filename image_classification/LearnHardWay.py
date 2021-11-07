@@ -19,7 +19,7 @@ class LearnHardWay(DefaultOptimizer):
                 units = 1
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
             h = tf.keras.layers.Dense(units=units, activation=None,
-                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.1))(h)
+                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
             if idx < len(config['disaggregation_layers_fracs'])-1:
                 h = tf.keras.layers.Activation('selu')(h)
 
@@ -35,7 +35,7 @@ class LearnHardWay(DefaultOptimizer):
                 units = 1
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
             h = tf.keras.layers.Dense(units=units, activation=None,
-                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=0.1))(h)
+                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
             if idx < len(config['disaggregation_layers_fracs']) - 1:
                 h = tf.keras.layers.Activation('selu')(h)
 
@@ -88,9 +88,9 @@ class LearnHardWay(DefaultOptimizer):
             z_true = self.disaggregation_model(y, training=True)
             z_pred = self.disaggregation_approx_model(y_pred, training=True)
             z_true_one_hot = tf.one_hot(tf.argmax(z_true, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
-            #z_pred_one_hot = tf.one_hot(tf.argmax(z_pred, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
+            z_pred_one_hot = tf.one_hot(tf.argmax(z_pred, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
 
-            loss_z = self.disaggregation_loss(y_true=z_pred, y_pred=z_true)
+            loss_z = self.disaggregation_loss(y_true=z_pred_one_hot, y_pred=z_true)
             loss_z_approx = self.disaggregation_loss(y_true=z_true_one_hot, y_pred=z_pred)
 
             if self.config['lhw_mode'] == 'lhw':
