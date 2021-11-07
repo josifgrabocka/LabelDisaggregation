@@ -54,13 +54,17 @@ class LearnHardWay(DefaultOptimizer):
     @tf.function
     def train_step(self, x, y):
 
+        z_true = self.disaggregation_model(y, training=False)
+        z_true = tf.one_hot(tf.argmax(z_true, axis=1),
+                            depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
+
         with tf.GradientTape(persistent=True) as tape:
 
             y_pred = self.prediction_model(x, training=True)
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-            z_true = self.disaggregation_model(y, training=False)
+
             z_pred = self.disaggregation_model(y_pred, training=True)
             loss_z = self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
 
