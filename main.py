@@ -70,6 +70,10 @@ config['dataset_name'] = args.dataset
 # load the dataset
 data_interface = DataInterface(config=config)
 data_interface.load(args.dataset)
+# set gamma proportional to the number of classes
+config['gamma'] = 100.0/data_interface.num_classes
+
+
 
 # create the prediction model
 models = []
