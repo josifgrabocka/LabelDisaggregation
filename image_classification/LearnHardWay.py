@@ -70,7 +70,7 @@ class LearnHardWay(DefaultOptimizer):
             elif self.config['lhw_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lhw_mode'] == 'max':
-                loss_disaggregation_model = --tf.tanh(self.disaggregation_gamma*loss_z)
+                loss_disaggregation_model = -tf.tanh(self.disaggregation_gamma*loss_z)
 
         # update the prediction model params
         if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'random':
