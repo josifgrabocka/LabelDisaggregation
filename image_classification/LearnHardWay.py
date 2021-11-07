@@ -20,7 +20,7 @@ class LearnHardWay(DefaultOptimizer):
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
             h = tf.keras.layers.Dense(units=units, activation=None)(h)
             if idx < len(config['disaggregation_layers_fracs'])-1:
-                h = tf.keras.layers.Activation('tanh')(h)
+                h = tf.keras.layers.Activation('selu')(h)
 
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_model.summary()
@@ -35,7 +35,7 @@ class LearnHardWay(DefaultOptimizer):
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
             h = tf.keras.layers.Dense(units=units, activation=None)(h)
             if idx < len(config['disaggregation_layers_fracs']) - 1:
-                h = tf.keras.layers.Activation('tanh')(h)
+                h = tf.keras.layers.Activation('selu')(h)
 
         self.disaggregation_approx_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_approx_model.summary()
