@@ -82,7 +82,7 @@ if config['learning_style'] == 'normal':
     de = DefaultOptimizer(prediction_model=m, config=config, data_interface=data_interface)
     de.run()
 elif config['learning_style'] == 'hard':
-    config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0, 1.0]
+    config['disaggregation_layers_fracs'] = [1.0, 1.0, 1.0]
     if args.lhw_mode:
         config['lhw_mode'] = args.lhw_mode
     lew = LearnHardWay(prediction_model=m, config=config, data_interface=data_interface)

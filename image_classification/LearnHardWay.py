@@ -14,12 +14,15 @@ class LearnHardWay(DefaultOptimizer):
         disaggregator_input = tf.keras.Input(self.data_interface.num_classes)
         h = disaggregator_input
         self.num_disaggregator_layer_units = []
-        for frac in config['disaggregation_layers_fracs']:
+        for idx, frac in enumerate(config['disaggregation_layers_fracs']):
             units=int(frac * self.data_interface.num_classes)
             if units == 0:
                 units = 1
-            h = tf.keras.layers.BatchNormalization()(h)
-            h = tf.keras.layers.Dense(units=units, activation='relu')(h)
+            # add a dense layer with relu activations, unless it is the last layer where the activation is None
+            h = tf.keras.layers.Dense(units=units, activation=None)(h)
+            if idx < len(config['disaggregation_layers_fracs'])-1:
+                h = tf.keras.layers.Activation('relu')(h)
+
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_model.summary()
 
@@ -27,7 +30,7 @@ class LearnHardWay(DefaultOptimizer):
         self.disaggregation_loss_metric = tf.keras.metrics.Mean(name='disaggregation_loss')
         self.logs_metrics.append(self.disaggregation_loss_metric)
         # add the additional loss term definitions
-        self.disaggregation_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+        self.disaggregation_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
 
         # the cosine decay learning rate scheduler with restarts and the decoupled L2 adam with gradient clipping
         step = tf.Variable(0, trainable=False)
@@ -57,7 +60,7 @@ class LearnHardWay(DefaultOptimizer):
             loss_y = self.cat_loss(y_true=y, y_pred=y_pred)
 
             # define the loss of the disaggregation
-            z_true = self.disaggregation_model(y, training=True)
+            z_true = self.disaggregation_model(y, training=False)
             z_pred = self.disaggregation_model(y_pred, training=True)
             loss_z = self.disaggregation_loss(y_true=z_true, y_pred=z_pred)
 
@@ -67,7 +70,7 @@ class LearnHardWay(DefaultOptimizer):
             elif self.config['lhw_mode'] == 'random':
                 loss_prediction_model = loss_y + loss_z
             elif self.config['lhw_mode'] == 'max':
-                loss_disaggregation_model = -tf.tanh(self.disaggregation_gamma*loss_z)
+                loss_disaggregation_model = --tf.tanh(self.disaggregation_gamma*loss_z)
 
         # update the prediction model params
         if self.config['lhw_mode'] == 'lhw' or self.config['lhw_mode'] == 'random':
