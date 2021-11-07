@@ -18,8 +18,7 @@ class LearnHardWay(DefaultOptimizer):
             if units == 0:
                 units = 1
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
-            h = tf.keras.layers.Dense(units=units, activation=None,
-                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
+            h = tf.keras.layers.Dense(units=units, activation=None)(h)
             if idx < len(config['disaggregation_layers_fracs'])-1:
                 h = tf.keras.layers.Activation('tanh')(h)
 
@@ -34,8 +33,7 @@ class LearnHardWay(DefaultOptimizer):
             if units == 0:
                 units = 1
             # add a dense layer with relu activations, unless it is the last layer where the activation is None
-            h = tf.keras.layers.Dense(units=units, activation=None,
-                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
+            h = tf.keras.layers.Dense(units=units, activation=None)(h)
             if idx < len(config['disaggregation_layers_fracs']) - 1:
                 h = tf.keras.layers.Activation('tanh')(h)
 
