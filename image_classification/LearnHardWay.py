@@ -88,9 +88,9 @@ class LearnHardWay(DefaultOptimizer):
             z_true = self.disaggregation_model(y, training=True)
             z_pred = self.disaggregation_approx_model(y_pred, training=True)
             z_true_one_hot = tf.one_hot(tf.argmax(z_true, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
-            z_pred_one_hot = tf.one_hot(tf.argmax(z_pred, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
+            #z_pred_one_hot = tf.one_hot(tf.argmax(z_pred, axis=1), depth=int(self.config['disaggregation_layers_fracs'][-1] * self.data_interface.num_classes))
 
-            loss_z = self.disaggregation_loss(y_true=z_pred_one_hot, y_pred=z_true)
+            loss_z = self.disaggregation_loss(y_true=z_pred, y_pred=z_true)
             loss_z_approx = self.disaggregation_loss(y_true=z_true_one_hot, y_pred=z_pred)
 
             if self.config['lhw_mode'] == 'lhw':
