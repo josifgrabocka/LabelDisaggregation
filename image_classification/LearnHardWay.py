@@ -21,7 +21,7 @@ class LearnHardWay(DefaultOptimizer):
             h = tf.keras.layers.Dense(units=units, activation=None,
                                       kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
             if idx < len(config['disaggregation_layers_fracs'])-1:
-                h = tf.keras.layers.Activation('selu')(h)
+                h = tf.keras.layers.Activation('tanh')(h)
 
         self.disaggregation_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_model.summary()
@@ -37,7 +37,7 @@ class LearnHardWay(DefaultOptimizer):
             h = tf.keras.layers.Dense(units=units, activation=None,
                                       kernel_initializer=tf.keras.initializers.RandomNormal(stddev=1.0))(h)
             if idx < len(config['disaggregation_layers_fracs']) - 1:
-                h = tf.keras.layers.Activation('selu')(h)
+                h = tf.keras.layers.Activation('tanh')(h)
 
         self.disaggregation_approx_model = tf.keras.Model(inputs=disaggregator_input, outputs=h)
         self.disaggregation_approx_model.summary()
